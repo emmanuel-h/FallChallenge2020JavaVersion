@@ -13,8 +13,6 @@ class Player {
         while (true) {
             List<Potion> potions = new ArrayList<>();
             List<Spell> spells = new ArrayList<>();
-            Witch witch;
-            Witch opponentWitch;
 
             int actionCount = in.nextInt(); // the number of spells and recipes in play
             for (int i = 0; i < actionCount; i++) {
@@ -42,33 +40,29 @@ class Player {
             int inv2 = in.nextInt();
             int inv3 = in.nextInt();
             int score = in.nextInt(); // amount of rupees
-            witch = new Witch(inv0, inv1, inv2, inv3, score);
+            Witch witch = new Witch(inv0, inv1, inv2, inv3, score);
 
             inv0 = in.nextInt(); // tier-0 ingredients in inventory
             inv1 = in.nextInt();
             inv2 = in.nextInt();
             inv3 = in.nextInt();
             score = in.nextInt(); // amount of rupees
-            opponentWitch = new Witch(inv0, inv1, inv2, inv3, score);
+            Witch opponentWitch = new Witch(inv0, inv1, inv2, inv3, score);
 
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
 
-            String action = "REST";
+            String action;
             Potion potion = getBestPotion(potions, witch);
             if (potion.brewable(witch)) {
                 action = "BREW " + potion.id;
             } else {
                 int[] missingIngredients = {
-                        potion.tier0Ingredient > 0 ? 0 : ((witch.tierOInventory + potion.tier0Ingredient) > 0 ? 0 : Math.abs(potion.tier0Ingredient + witch.tierOInventory)),
-                        potion.tier1Ingredient > 0 ? 0 : ((witch.tier1Inventory + potion.tier1Ingredient) > 0 ? 0 : Math.abs(potion.tier1Ingredient + witch.tier1Inventory)),
-                        potion.tier2Ingredient > 0 ? 0 : ((witch.tier2Inventory + potion.tier2Ingredient) > 0 ? 0 : Math.abs(potion.tier2Ingredient + witch.tier2Inventory)),
-                        potion.tier3Ingredient > 0 ? 0 : ((witch.tier3Inventory + potion.tier3Ingredient) > 0 ? 0 : Math.abs(potion.tier3Ingredient + witch.tier3Inventory))
+                        (witch.tierOInventory + potion.tier0Ingredient) > 0 ? 0 : Math.abs(potion.tier0Ingredient + witch.tierOInventory),
+                        (witch.tier1Inventory + potion.tier1Ingredient) > 0 ? 0 : Math.abs(potion.tier1Ingredient + witch.tier1Inventory),
+                        (witch.tier2Inventory + potion.tier2Ingredient) > 0 ? 0 : Math.abs(potion.tier2Ingredient + witch.tier2Inventory),
+                        (witch.tier3Inventory + potion.tier3Ingredient) > 0 ? 0 : Math.abs(potion.tier3Ingredient + witch.tier3Inventory)
                 };
-                System.err.println("potion missing ingredients ");
-                System.err.println(Arrays.toString(missingIngredients));
-                System.err.println(potion);
-                System.err.println(witch);
 
                 Optional<Spell> bestSpell = getBestSpell(spells, witch, missingIngredients);
                 action = bestSpell.map(spell -> "CAST " + spell.id).orElse("REST");
@@ -93,9 +87,6 @@ class Player {
                 bestSpell = Optional.of(spell);
                 break;
             } else {
-                System.err.println("la");
-                System.err.println(spell);
-                System.err.println(Arrays.toString(missingIngredients));
                 missingIngredients[0] = spell.tierOIngredient > 0 ? 0 : ((witch.tierOInventory + spell.tierOIngredient) > 0 ? 0 : Math.abs(witch.tierOInventory + spell.tierOIngredient));
                 missingIngredients[1] = spell.tier1Ingredient > 0 ? 0 : ((witch.tier1Inventory + spell.tier1Ingredient) > 0 ? 0 : Math.abs(witch.tier1Inventory + spell.tier1Ingredient));
                 missingIngredients[2] = spell.tier2Ingredient > 0 ? 0 : ((witch.tier2Inventory + spell.tier2Ingredient) > 0 ? 0 : Math.abs(witch.tier2Inventory + spell.tier2Ingredient));
@@ -135,9 +126,10 @@ class Potion {
     public int appeal(Witch witch) {
         return this.price
                 + Math.min(witch.tierOInventory + tier0Ingredient, 0)
-                + 2*Math.min(witch.tier1Inventory + tier1Ingredient, 0)
-                + 4*Math.min(witch.tier2Inventory + tier2Ingredient, 0)
-                + 8*Math.min(witch.tier3Inventory + tier3Ingredient, 0);
+                + 2 * Math.min(witch.tier1Inventory + tier1Ingredient, 0)
+                + 3 * Math.min(witch.tier2Inventory + tier2Ingredient, 0)
+                + 4 * Math.min(witch.tier3Inventory + tier3Ingredient, 0)
+                ;
     }
 
     @Override
